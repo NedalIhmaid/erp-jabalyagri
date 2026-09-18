@@ -1,0 +1,399 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+
+/*
+ * Catalog tokens — grounded in the Al-Jabali mark (public/images/logo.svg:
+ * pine green #005922, seal red #E30411) and the paper/ledger feel of a
+ * printed agricultural catalog. `primary-*` already carries the brand green
+ * (see AdminPanelProvider::colors); these fill in what that scale doesn't:
+ * a sage-tinted page ground, a soil ink for secondary text, a muted seal red
+ * for the availability stamp, and a hairline rule colour.
+ */
+@theme {
+    --color-paper: #f2f4ec;
+    --color-soil: #5b4a36;
+    --color-seal: #8a2b20;
+    --color-line: #dadec9;
+}
+
+html[dir='ltr'] .fi-body,
+html[dir='ltr'] .fi-main,
+html[dir='ltr'] .fi-sidebar,
+html[dir='ltr'] .fi-topbar,
+html[dir='ltr'] .fi-modal-window,
+html[dir='ltr'] .fi-dropdown-panel,
+html[dir='ltr'] .fi-ta-table,
+html[dir='ltr'] .fi-in-entry-wrp,
+html[dir='ltr'] .fi-fo-field-wrp {
+    direction: ltr;
+    text-align: left;
+}
+
+html[dir='ltr'] :is(input, textarea, select) {
+    direction: ltr;
+    text-align: left;
+}
+
+html[dir='rtl'] :is(input, textarea, select) {
+    direction: rtl;
+    text-align: right;
+}
+
+.fi-topbar {
+    @apply backdrop-blur-md bg-white/90 dark:bg-gray-900/90;
+}
+
+.fi-topbar-quick-actions {
+    @apply flex flex-none items-center gap-2 sm:gap-3;
+}
+
+.fi-topbar-quick-actions-divider {
+    @apply hidden h-6 w-px shrink-0 bg-gray-200 sm:block dark:bg-white/10;
+}
+
+/*
+ * Below lg: hide search in navigation chrome (global search) and in the table
+ * header toolbar (list search sits directly under the top bar on phones).
+ */
+@media (max-width: 1023px) {
+    .fi-topbar .fi-global-search-ctn,
+    .fi-sidebar .fi-global-search-ctn {
+        @apply hidden;
+    }
+
+    .fi-ta-header-toolbar .fi-ta-search-field {
+        @apply hidden;
+    }
+}
+
+/* ==========================================================================
+ * Catalog — field-ledger system, 3rd edition (white ground)
+ *
+ * The three read-only catalog pages (product-categories, product-categories
+ * /{id}, products/{id}) share one language, calibrated against reference
+ * seed-catalog sites: a clean white ground, hairline-framed panels, tabular
+ * numerals for every figure, and a single recurring loud device — the
+ * rotated ink availability stamp. Product photos are transparent cutouts
+ * floating on white plates. Hover is quiet and uniform: hairlines warm to
+ * the brand green, titles underline, arrows nudge in the reading direction,
+ * photos zoom ~3%. Not a rounded-card-with-shadow SaaS kit; these pages read
+ * as a printed spec catalog.
+ * ========================================================================== */
+
+[x-cloak] { display: none !important; }
+
+.catalog-product {
+    @apply min-h-[calc(100vh-5.5rem)] w-full bg-white pb-12 dark:bg-transparent;
+}
+
+/* The index panel fills the main area edge to edge (no gray gutters on wide
+ * screens) and down to the viewport bottom; a centered measure inside keeps
+ * the reading column sane. */
+.catalog-index {
+    @apply w-full min-h-[calc(100vh-5.5rem)] bg-white pb-10 dark:bg-transparent;
+}
+
+/* Hero + content share one centered measure; the hero hairline spans the
+ * full panel width. */
+.catalog-index__hero { @apply border-b border-line dark:border-white/10; }
+.catalog-index__measure,
+.catalog-index__content { @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-10; }
+.catalog-index__measure { @apply py-6 lg:py-8; }
+
+/* Scoped by :has(.catalog-index, .catalog-product), so only the catalog pages
+ * tighten Filament's page frame: the empty header block and its surrounding
+ * padding go away, and the main area drops its centered 80rem cap and padding
+ * to sit flush beside the sidebar. */
+.fi-main:has(.catalog-index, .catalog-product) { @apply m-0 max-w-none p-3; }
+.fi-page-header-main-ctn:has(.catalog-index, .catalog-product) { @apply gap-0 p-0; }
+.fi-page-header-main-ctn:has(.catalog-index, .catalog-product) > .fi-header { @apply hidden; }
+
+/* Admin table pages (every resource list): drop the centered column cap so
+   tables aren't a narrow strip between wide gray bands. Frame padding and
+   page headers keep the stock admin rhythm. */
+.fi-main:has(.fi-ta-ctn) { @apply m-0 max-w-none; }
+
+/* --------------------------------------------------------------------------
+ * Shared hero header (index) & breadcrumb
+ * ------------------------------------------------------------------------ */
+
+.catalog-hero {
+    @apply border-b border-line px-6 py-10 sm:px-10 lg:px-1 lg:py-14 dark:border-white/10;
+}
+
+.catalog-hero__eyebrow {
+    @apply mb-3 text-xs font-bold uppercase tracking-[0.18em] text-primary-700 dark:text-primary-400;
+}
+
+a.catalog-hero__eyebrow--link { @apply inline-block hover:underline underline-offset-4; }
+
+.catalog-hero__title {
+    @apply text-3xl font-bold leading-tight text-gray-950 sm:text-4xl dark:text-white;
+}
+
+.catalog-hero__desc {
+    @apply mt-3 max-w-2xl text-base leading-7 text-soil dark:text-gray-400;
+}
+
+.catalog-hero__stats {
+    @apply mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-soil dark:text-gray-400;
+}
+
+.catalog-hero__stat bdi {
+    @apply text-lg font-bold text-gray-950 [font-variant-numeric:tabular-nums] dark:text-white;
+}
+
+.catalog-hero__stat-sep {
+    @apply h-4 w-px bg-line dark:bg-white/15;
+}
+
+/* Breadcrumb sits as a slim ruled strip at the very top of the panel,
+ * aligned with the hero intro's padding. */
+.catalog-breadcrumb { @apply flex items-center gap-2 overflow-hidden border-b border-line px-6 py-3.5 text-sm text-soil/70 sm:px-10 lg:px-14 dark:border-white/10 dark:text-gray-500; }
+.catalog-breadcrumb a { @apply shrink-0 hover:text-primary-700 hover:underline underline-offset-4 dark:hover:text-primary-400; }
+.catalog-breadcrumb span { @apply truncate text-soil dark:text-gray-300; }
+.catalog-breadcrumb svg { @apply h-3.5 w-3.5 shrink-0; }
+[dir='ltr'] .catalog-breadcrumb svg,
+[dir='ltr'] .catalog-direction-icon { transform: scaleX(-1); }
+
+/* --------------------------------------------------------------------------
+ * Product / family hero — a split panel, hairline-framed, photo bled to the
+ * edges. The intro leads with the ink stamp, then eyebrow, title, SKU,
+ * lead copy, actions.
+ * ------------------------------------------------------------------------ */
+
+.catalog-product__hero { @apply grid border border-line lg:grid-cols-2 dark:border-white/10 dark:bg-gray-900; }
+.catalog-product__intro { @apply flex flex-col items-center justify-center gap-4 px-6 py-8 text-center sm:px-10 lg:min-h-[320px] lg:px-14; }
+
+.catalog-product__intro h1 { @apply text-3xl font-bold leading-[1.15] text-gray-950 sm:text-4xl lg:text-[2.75rem] dark:text-white; }
+
+.catalog-product__sku { @apply flex flex-wrap items-center justify-center gap-2 text-sm text-soil/70 dark:text-gray-500; }
+.catalog-product__sku > bdi { @apply font-semibold tracking-wide text-soil [font-variant-numeric:tabular-nums] dark:text-gray-300; }
+
+.catalog-copy-btn {
+    @apply inline-flex cursor-pointer items-center gap-1.5 border border-line bg-white px-2.5 py-1 text-xs font-semibold text-soil transition-colors hover:border-primary-700/50 hover:text-primary-800
+        dark:border-white/15 dark:bg-gray-900 dark:text-gray-400 dark:hover:border-primary-400/60 dark:hover:text-primary-300;
+}
+.catalog-copy-btn svg { @apply h-3.5 w-3.5; }
+.catalog-copy-btn .is-copied { @apply border-success-500 text-success-700 dark:text-success-400; }
+
+.catalog-product__lead { @apply max-w-xl whitespace-pre-line text-base leading-8 text-soil dark:text-gray-300; }
+
+.catalog-product__links { @apply mt-1 flex flex-wrap justify-center gap-3; }
+
+.catalog-button { @apply inline-flex items-center gap-2 border border-primary-800 px-5 py-3 text-sm font-bold text-primary-800 transition-colors hover:bg-primary-800/5 dark:border-primary-400 dark:text-primary-300 dark:hover:bg-white/5; }
+.catalog-button svg { @apply h-5 w-5; }
+.catalog-button--filled { @apply border-primary-800 bg-primary-800 text-white hover:bg-primary-900 dark:bg-primary-600 dark:text-white; }
+
+.catalog-product__photo { @apply relative m-0 flex min-h-[260px] items-center justify-center overflow-hidden border-s border-line bg-white lg:min-h-[320px] dark:border-white/10 dark:bg-gray-900/40; }
+.catalog-product__photo img { @apply mx-auto max-h-[280px] w-full object-contain p-6 lg:p-8; }
+.catalog-product__photo-empty { @apply flex h-full min-h-[300px] items-center justify-center bg-gray-50 text-gray-300 dark:bg-gray-800 dark:text-gray-600; }
+.catalog-product__photo-empty svg { @apply h-20 w-20; }
+
+.catalog-button.is-disabled { @apply cursor-not-allowed opacity-40; }
+.catalog-button.is-disabled:hover { @apply bg-transparent dark:bg-transparent; }
+
+/* Availability stamp — the one bold, reused device on every page. An
+ * ink-stamp mark rather than a status pill, echoing the certification
+ * stamps on a real agricultural spec sheet. */
+.catalog-stamp {
+    @apply inline-flex items-center border-2 px-3 py-1 text-xs font-bold tracking-wide;
+    transform: rotate(-3deg);
+}
+.catalog-stamp.is-available { @apply border-primary-700 text-primary-800 dark:border-primary-400 dark:text-primary-300; }
+.catalog-stamp.is-unavailable { @apply border-seal text-seal dark:border-red-400/70 dark:text-red-400; }
+
+/* --------------------------------------------------------------------------
+ * Product detail body — content column + sticky facts ledger.
+ * ------------------------------------------------------------------------ */
+
+.catalog-product__body { @apply grid gap-8 px-1 py-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:py-8; }
+
+/* No overview copy: the packages ledger takes the full band and lays its
+ * rows out in columns instead of leaving half the page empty. */
+.catalog-product__body--compact { @apply lg:grid-cols-1; }
+.catalog-product__body--compact .catalog-product__facts { @apply lg:static; }
+.catalog-product__body--compact .catalog-units { @apply grid gap-x-10 py-2 sm:grid-cols-2 lg:grid-cols-3; }
+.catalog-product__body--compact .catalog-unit { @apply border-0; }
+.catalog-product__content { @apply mx-auto min-w-0 w-full max-w-3xl; }
+.catalog-section { @apply max-w-3xl; }
+.catalog-section h2 { @apply border-s-4 border-primary-700 ps-4 text-2xl font-bold text-gray-950 sm:text-[1.75rem] dark:border-primary-400 dark:text-white; }
+.catalog-section__copy { @apply mt-4 whitespace-pre-line text-base leading-8 text-soil dark:text-gray-300; }
+.catalog-section--full { @apply max-w-none; }
+
+/* Long catalog copy: one reading measure, real paragraphs, sub-headings and
+ * bullet lists parsed out of the plain-text description. */
+.catalog-prose { @apply mt-4 max-w-[68ch] text-base leading-8 text-soil dark:text-gray-300; }
+.catalog-prose > * + * { @apply mt-4; }
+.catalog-prose h3 { @apply mt-8 border-s-2 border-primary-700/60 ps-3 text-lg font-bold text-gray-950 first:mt-0 dark:border-primary-400/60 dark:text-white; }
+.catalog-prose a { @apply font-medium text-primary-700 underline underline-offset-4 dark:text-primary-400; }
+.catalog-prose ul { @apply grid gap-2; }
+.catalog-prose li { @apply relative ps-5; }
+.catalog-prose li::before { @apply absolute top-3 start-0 h-1.5 w-1.5 rounded-full bg-primary-700 content-[''] dark:bg-primary-400; }
+
+/* Related varieties sit on their own full-width band under the ledger. */
+.catalog-product__related { @apply border-t border-line px-1 py-6 lg:py-8 dark:border-white/10; }
+.catalog-product__related .catalog-related { @apply sm:grid-cols-2 lg:grid-cols-4; }
+
+/* Facts / unit ledger — a bordered, tabular price list, pinned alongside the
+ * content column on wide screens. */
+.catalog-product__facts { @apply h-fit border border-line bg-white lg:sticky lg:top-20 dark:border-white/10 dark:bg-gray-900; }
+.catalog-facts__heading { @apply flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-4 dark:border-white/10; }
+.catalog-facts__heading h2 { @apply text-lg font-bold text-gray-950 dark:text-white; }
+.catalog-units { @apply px-5; }
+.catalog-unit { @apply flex items-center justify-between gap-4 border-b border-line py-4 transition-colors last:border-0 hover:bg-paper/60 dark:border-white/10 dark:hover:bg-white/5; }
+.catalog-unit strong { @apply block text-sm font-bold text-gray-900 dark:text-white; }
+.catalog-unit span { @apply mt-1 block text-xs text-soil/70 dark:text-gray-400; }
+.catalog-units__empty { @apply py-8 text-center text-soil/60 dark:text-gray-500; }
+
+/* Shared empty state — a dashed "empty shelf" panel. */
+.catalog-empty {
+    @apply mt-8 flex flex-col items-center gap-3 border border-dashed border-line bg-white/50 px-6 py-14 text-center dark:border-white/15 dark:bg-gray-900/40;
+}
+.catalog-empty svg { @apply h-10 w-10 text-line dark:text-gray-600; }
+.catalog-empty p { @apply text-sm font-medium text-soil/70 dark:text-gray-400; }
+
+/* --------------------------------------------------------------------------
+ * Related varieties — compact bordered cards, same language as the family
+ * tiles: quiet hairlines, one green cue, arrow nudges on hover.
+ * ------------------------------------------------------------------------ */
+
+.catalog-related { @apply mt-6 grid gap-x-6 gap-y-8 sm:grid-cols-2; }
+
+.catalog-related__item { @apply flex flex-col; }
+
+.catalog-related__photo { @apply flex aspect-[16/9] items-center justify-center overflow-hidden bg-white p-4 text-gray-300 dark:bg-transparent dark:text-gray-600; }
+.catalog-related__photo img { @apply h-full w-full object-contain transition-transform duration-300; }
+.catalog-related__item:hover .catalog-related__photo img { transform: scale(1.03); }
+
+.catalog-related__body { @apply flex flex-1 flex-col items-center p-3 pt-2 text-center; }
+.catalog-related__body h3 { @apply text-base font-bold text-gray-900 dark:text-white; }
+.catalog-related__item:hover h3 { @apply underline decoration-primary-600 underline-offset-4 dark:decoration-primary-400; }
+
+/* --------------------------------------------------------------------------
+ * Category detail — hero meta row plus the family tiles.
+ * ------------------------------------------------------------------------ */
+
+.catalog-family__meta { @apply mt-2 flex flex-wrap items-center gap-4; }
+.catalog-family__count { @apply inline-flex items-center gap-1.5 text-sm text-soil dark:text-gray-400; }
+.catalog-family__count svg { @apply h-4 w-4; }
+.catalog-family__count bdi { @apply font-bold text-gray-950 [font-variant-numeric:tabular-nums] dark:text-white; }
+
+.catalog-family__body { @apply px-1 py-6 lg:py-8; }
+
+/* Family tiles — bordered cards with true gaps (no ruled-grid background
+ * trick, which leaves an odd-looking filled cell when the last row is not
+ * full). Photo bled to the tile top; single green hover cue. */
+.catalog-family-grid { @apply mt-8 grid gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-4; }
+
+.catalog-family-card { @apply flex flex-col; }
+
+.catalog-family-card__photo { @apply relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-white p-4 text-gray-300 dark:bg-transparent dark:text-gray-600; }
+.catalog-family-card__photo img { @apply h-full w-full object-contain transition-transform duration-300; }
+.catalog-family-card:hover .catalog-family-card__photo img { transform: scale(1.03); }
+.catalog-family-card__photo svg { @apply h-10 w-10; }
+
+.catalog-family-card__inactive {
+    @apply absolute bottom-3 start-3 border-2 border-seal bg-white/85 px-2 py-0.5 text-[11px] font-bold tracking-wide text-seal backdrop-blur dark:bg-gray-950/70 dark:border-red-400/70 dark:text-red-400;
+    transform: rotate(-3deg);
+}
+
+.catalog-family-card__body { @apply flex flex-1 flex-col items-center p-3 pt-2 text-center; }
+.catalog-family-card__body h3 { @apply text-base font-bold text-gray-950 dark:text-white; }
+.catalog-family-card:hover h3 { @apply underline decoration-primary-600 underline-offset-4 dark:decoration-primary-400; }
+
+/* --------------------------------------------------------------------------
+ * Catalog index — the engineer list page renders its own hero, search box and
+ * rows (no Filament table), so the catalog hairline language needs no
+ * framework overrides here: the list is just links around one ruled
+ * .catalog-family-row each.
+ * ------------------------------------------------------------------------ */
+
+
+/* Search sits at the start of the list and lines up with the entries' edge. */
+.catalog-search {
+    @apply mt-6 mb-4 flex w-full max-w-sm items-center gap-2 border border-line bg-white px-3 py-2 text-sm transition-colors focus-within:border-primary-700 dark:border-white/15 dark:bg-gray-900 dark:focus-within:border-primary-400;
+}
+.catalog-search svg { @apply h-4 w-4 shrink-0 text-soil/60 dark:text-gray-500; }
+.catalog-search input { @apply w-full bg-transparent outline-none placeholder:text-soil/50 dark:placeholder:text-gray-500; }
+
+.catalog-index__list { @apply border-t border-line dark:border-white/10; }
+
+/* Category list rows — one ruled entry per category, the printed-index
+ * counterpart to the variety tiles on the category page: plate, name and
+ * lead copy at the start, one stats block at the end.
+ *
+ * The stats block is a single set of elements, not two copies switched by
+ * display: none — flex-wrap lets it drop below the title as a compact inline
+ * line on narrow screens (where there's no room for a side column) and the
+ * sm: variants promote it to a bordered tally column once the row is wide
+ * enough to hold one. */
+.catalog-family-row {
+    @apply flex w-full flex-wrap items-center gap-x-4 gap-y-2 border-b border-line py-4 transition-colors hover:bg-paper/50 sm:flex-nowrap sm:gap-6 dark:border-white/10 dark:hover:bg-white/5;
+}
+
+.catalog-index__pagination { @apply mt-8 border-t border-line pt-4 dark:border-white/10; }
+
+/* Ledger numbering — zero-padded entry number at the start of each row. */
+.catalog-family-row__index {
+    @apply w-8 shrink-0 text-center text-sm font-bold text-soil/50 [font-variant-numeric:tabular-nums] sm:w-10 sm:text-lg dark:text-gray-500;
+}
+
+.catalog-family-row__photo {
+    @apply flex size-18 shrink-0 items-center justify-center overflow-hidden border border-line bg-white p-2 text-gray-300 sm:size-20 dark:border-white/10 dark:bg-gray-900/40 dark:text-gray-600;
+}
+.catalog-family-row__photo img { @apply h-full w-full object-contain transition-transform duration-300; }
+.catalog-family-row__photo svg { @apply h-7 w-7; }
+.catalog-family-row:hover .catalog-family-row__photo img { transform: scale(1.04); }
+
+.catalog-family-row__body { @apply min-w-0 flex-1 basis-full sm:basis-auto; }
+.catalog-family-row__body h3 { @apply text-base font-bold text-gray-950 sm:text-lg dark:text-white; }
+.catalog-family-row:hover h3 { @apply underline decoration-primary-600 underline-offset-4 dark:decoration-primary-400; }
+.catalog-family-row__desc { @apply mt-1 line-clamp-2 max-w-2xl text-sm leading-6 text-soil dark:text-gray-400; }
+
+.catalog-family-row__stats {
+    @apply flex shrink-0 flex-wrap items-center gap-x-4 gap-y-1 ps-[calc(4.5rem+1rem)] sm:gap-6 sm:border-s sm:border-line sm:ps-6 dark:sm:border-white/10;
+}
+.catalog-family-row__stats .catalog-stamp { @apply px-2 py-0.5 text-[11px]; }
+
+.catalog-family-row__stat { @apply flex items-baseline gap-1 sm:min-w-16 sm:flex-col sm:items-center sm:gap-0.5; }
+.catalog-family-row__stat bdi { @apply text-sm font-bold text-gray-950 [font-variant-numeric:tabular-nums] sm:text-xl dark:text-white; }
+.catalog-family-row__stat small { @apply text-xs text-soil/70 sm:text-[11px] sm:font-medium dark:text-gray-500; }
+
+.catalog-family-row__arrow { @apply h-5 w-5 shrink-0 text-primary-700 transition-transform dark:text-primary-400; }
+[dir='rtl'] .catalog-family-row:hover .catalog-family-row__arrow { transform: translateX(-3px); }
+[dir='ltr'] .catalog-family-row:hover .catalog-family-row__arrow { transform: scaleX(-1) translateX(-3px); }
+
+/* --------------------------------------------------------------------------
+ * Responsive & motion preferences
+ * ------------------------------------------------------------------------ */
+
+@media (max-width: 1023px) {
+    .catalog-product__hero { @apply flex flex-col-reverse; }
+    .catalog-product__photo { @apply min-h-0 border-s-0 border-b border-line dark:border-white/10; }
+    .catalog-product__photo img { height: auto !important; aspect-ratio: 4 / 3; @apply p-6; }
+    .catalog-product__photo-empty { @apply min-h-0 aspect-[4/3]; }
+    .catalog-product__body { @apply grid-cols-1; }
+    .catalog-product__facts { @apply static; }
+}
+
+@media (max-width: 640px) {
+    .catalog-hero { @apply py-8; }
+    .catalog-product__intro { @apply px-6 py-8; }
+    .catalog-product__body { @apply gap-8 py-8; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .catalog-family-card__photo img,
+    .catalog-family-row__photo img,
+    .catalog-family-row__arrow,
+    .catalog-related__photo img,
+    .catalog-copy-btn,
+    .catalog-family-card,
+    .catalog-related__item {
+        transition: none !important;
+        transform: none !important;
+    }
+}

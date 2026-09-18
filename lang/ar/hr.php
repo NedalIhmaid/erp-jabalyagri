@@ -1,0 +1,58 @@
+<?php
+
+return [
+    'title' => 'إدارة الموارد البشرية',
+    'types' => [
+        'annual_leave' => 'إجازة سنوية',
+        'sick_leave' => 'إجازة مرضية',
+        'unpaid_leave' => 'إجازة غير مدفوعة',
+        'bereavement_first' => 'وفاة درجة أولى',
+        'bereavement_second' => 'وفاة درجة ثانية',
+        'marriage_leave' => 'إجازة زواج',
+        'maternity_leave' => 'إجازة أمومة',
+        'paternity_leave' => 'إجازة مولود جديد',
+        'early_departure' => 'مغادرة',
+        'departure_from_annual' => 'مغادرة من الإجازات',
+    ],
+    'status' => [
+        'manager_approved' => 'موافق عليها من المدير المباشر',
+    ],
+    'start_date' => 'تاريخ البداية',
+    'end_date' => 'تاريخ النهاية',
+    'start_time' => 'وقت البداية',
+    'end_time' => 'وقت النهاية',
+    'duration_days' => 'عدد الأيام',
+    'reason' => 'السبب',
+    'attachment' => 'مرفق',
+    'medical_report' => 'تقرير طبي',
+    'direct_manager' => 'المدير المباشر',
+    'general_manager' => 'المدير العام',
+    'type' => 'النوع',
+    'new_request_submitted' => 'تم تقديم طلب موارد بشرية جديد',
+    'new_hr_request_message' => 'تم تقديم طلب إجازة/مغادرة جديد يحتاج موافقتك',
+    'request_approved' => 'تمت الموافقة على الطلب',
+    'request_approved_message' => 'تمت الموافقة على طلب الإجازة/المغادرة',
+    'approved_by' => 'تمت الموافقة بواسطة',
+    'request_rejected' => 'تم رفض الطلب',
+    'request_rejected_message' => 'تم رفض طلب الإجازة/المغادرة',
+    'rejected_by' => 'تم الرفض بواسطة',
+    'view_request' => 'عرض الطلب',
+
+    // Leave balance widget
+    'balance_title'  => 'رصيد الإجازات',
+    'annual'         => 'السنوية',
+    'sick'           => 'المرضية',
+    'maternity'      => 'الأمومة',
+    'marriage'       => 'الزواج',
+    'of_total'       => 'من أصل',
+    'days'           => 'يوم',
+    'available'      => 'متاحة',
+    'used'           => 'مستخدمة',
+    'maternity_total'=> '70 يوم',
+
+    // New-request balance hint
+    'requested_days'      => 'الأيام المطلوبة: :days يوم',
+    'current_balance'     => 'الرصيد الحالي: :days يوم',
+    'balance_until_leave' => 'الرصيد حتى تاريخ الإجازة: :days يوم',
+    'earned_to_date'      => 'المرصّد حتى اليوم: :days',
+];

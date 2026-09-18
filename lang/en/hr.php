@@ -1,0 +1,58 @@
+<?php
+
+return [
+    'title' => 'HR Management',
+    'types' => [
+        'annual_leave' => 'Annual Leave',
+        'sick_leave' => 'Sick Leave',
+        'unpaid_leave' => 'Unpaid Leave',
+        'bereavement_first' => 'Bereavement 1st Degree',
+        'bereavement_second' => 'Bereavement 2nd Degree',
+        'marriage_leave' => 'Marriage Leave',
+        'maternity_leave' => 'Maternity Leave',
+        'paternity_leave' => 'Paternity Leave',
+        'early_departure' => 'Early Departure',
+        'departure_from_annual' => 'Departure from Annual Balance',
+    ],
+    'status' => [
+        'manager_approved' => 'Approved by Direct Manager',
+    ],
+    'start_date' => 'Start Date',
+    'end_date' => 'End Date',
+    'start_time' => 'Start Time',
+    'end_time' => 'End Time',
+    'duration_days' => 'Duration (Days)',
+    'reason' => 'Reason',
+    'attachment' => 'Attachment',
+    'medical_report' => 'Medical Report',
+    'direct_manager' => 'Direct Manager',
+    'general_manager' => 'General Manager',
+    'type' => 'Type',
+    'new_request_submitted' => 'A new HR request has been submitted',
+    'new_hr_request_message' => 'A new leave/departure request needs your approval',
+    'request_approved' => 'Request Approved',
+    'request_approved_message' => 'Your leave/departure request has been approved',
+    'approved_by' => 'Approved by',
+    'request_rejected' => 'Request Rejected',
+    'request_rejected_message' => 'Your leave/departure request has been rejected',
+    'rejected_by' => 'Rejected by',
+    'view_request' => 'View Request',
+
+    // Leave balance widget
+    'balance_title'  => 'Leave Balance',
+    'annual'         => 'Annual',
+    'sick'           => 'Sick',
+    'maternity'      => 'Maternity',
+    'marriage'       => 'Marriage',
+    'of_total'       => 'of',
+    'days'           => 'days',
+    'available'      => 'Available',
+    'used'           => 'Used',
+    'maternity_total'=> '70 days',
+
+    // New-request balance hint
+    'requested_days'      => 'Requested Days: :days Day(s)',
+    'current_balance'     => 'Current Balance: :days Day(s)',
+    'balance_until_leave' => 'Balance until leave date: :days Day(s)',
+    'earned_to_date'      => 'Earned to date: :days',
+];
