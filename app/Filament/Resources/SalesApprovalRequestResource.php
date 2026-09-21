@@ -6,9 +6,9 @@ use App\Enums\ApprovalAction;
 use App\Enums\ProjectType;
 use App\Enums\SalesRequestStatus;
 use App\Filament\Resources\SalesApprovalRequestResource\Pages;
+use App\Models\CompanyMaterial;
+use App\Models\CompanyMaterialCategory;
 use App\Models\PaymentMethod;
-use App\Models\Product;
-use App\Models\ProductUnit;
 use App\Models\SalesApprovalRequest;
 use App\Models\User;
 use App\Services\AuditLogger;
@@ -147,7 +147,7 @@ class SalesApprovalRequestResource extends Resource
                             ->required(),
                     ])->columns(2),
 
-                // Products
+                // Company materials
                 Section::make(__('sales.items'))
                     ->schema([
                         Repeater::make('items')
@@ -155,81 +155,40 @@ class SalesApprovalRequestResource extends Resource
                             ->hiddenLabel()
                             ->relationship()
                             ->schema([
-                                Select::make('product_id')
-                                    ->label(__('sales.product'))
-                                    ->options(fn (): array => Product::query()
-                                        ->with('family')
+                                Select::make('company_material_id')
+                                    ->label(__('company.material'))
+                                    ->options(fn (): array => CompanyMaterial::query()
                                         ->where('is_active', true)
                                         ->orderBy('name')
-                                        ->get()
-                                        ->mapWithKeys(fn (Product $product) => [
-                                            $product->id => $product->family
-                                                ? "{$product->family->name} → {$product->name}"
-                                                : $product->name,
-                                        ])
+                                        ->pluck('name', 'id')
                                         ->all())
                                     ->searchable()
                                     ->preload()
                                     ->required()
+                                    ->createOptionForm([
+                                        TextInput::make('name')->label(__('company.name'))->required()->maxLength(255),
+                                        Select::make('company_material_category_id')
+                                            ->label(__('company.category'))
+                                            ->options(fn (): array => CompanyMaterialCategory::query()->orderBy('sort')->pluck('name', 'id')->all())
+                                            ->searchable()->required(),
+                                        TextInput::make('unit')->label(__('company.unit'))->required()->maxLength(50),
+                                    ])
+                                    ->createOptionUsing(fn (array $data): int => CompanyMaterial::create($data + ['is_active' => true])->id)
                                     ->live()
                                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                        $product = filled($state) ? Product::find($state) : null;
+                                        $material = filled($state) ? CompanyMaterial::find($state) : null;
 
                                         $set('product_unit_id', null);
-                                        $set('unit', null);
+                                        $set('product_id', null);
+                                        $set('unit', $material?->unit);
                                         $set('unit_price', null);
                                         $set('total_price', 0);
-
-                                        if ($product) {
-                                            $set('product_name', $product->name);
-                                        } else {
-                                            $set('product_name', null);
-                                        }
-                                    })
-                                    ->columnSpanFull(),
-
-                                Select::make('product_unit_id')
-                                    ->label(__('sales.product_unit'))
-                                    ->options(function (callable $get): array {
-                                        $productId = $get('product_id');
-
-                                        if (blank($productId)) {
-                                            return [];
-                                        }
-
-                                        return ProductUnit::query()
-                                            ->where('product_id', $productId)
-                                            ->where('is_active', true)
-                                            ->orderBy('label')
-                                            ->get()
-                                            ->mapWithKeys(fn ($u) => [$u->id => "{$u->label} — JOD {$u->price}"])
-                                            ->all();
-                                    })
-                                    ->required()
-                                    ->disabled(fn (callable $get): bool => blank($get('product_id')))
-                                    ->live()
-                                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                        $unit = filled($state) ? ProductUnit::find($state) : null;
-
-                                        if (! $unit) {
-                                            $set('unit', null);
-                                            $set('unit_price', null);
-                                            $set('total_price', 0);
-
-                                            return;
-                                        }
-
-                                        $quantity = floatval($get('quantity'));
-                                        $unitPrice = floatval($unit->price);
-
-                                        $set('unit', $unit->label);
-                                        $set('unit_price', $unitPrice);
-                                        $set('total_price', round($quantity * $unitPrice, 2));
+                                        $set('product_name', $material?->name);
                                     })
                                     ->columnSpanFull(),
 
                                 TextInput::make('product_name')
-                                    ->label(__('sales.product_name'))
+                                    ->label(__('company.material'))
                                     ->required()
                                     ->disabled()
                                     ->dehydrated()
@@ -255,8 +214,7 @@ class SalesApprovalRequestResource extends Resource
                                 TextInput::make('unit')
                                     ->label(__('sales.unit'))
                                     ->required()
-                                    ->disabled()
-                                    ->dehydrated(),
+                                    ->maxLength(50),
 
                                 TextInput::make('unit_price')
                                     ->label(__('sales.unit_price'))
@@ -343,7 +301,7 @@ class SalesApprovalRequestResource extends Resource
                             ->label(__('sales.items'))
                             ->hiddenLabel()
                             ->schema([
-                                TextEntry::make('display_product_name')->label(__('sales.product_name')),
+                                TextEntry::make('display_product_name')->label(__('company.material')),
                                 TextEntry::make('quantity')->label(__('sales.quantity'))->numeric(),
                                 TextEntry::make('unit')->label(__('sales.unit')),
                                 TextEntry::make('unit_price')->label(__('sales.unit_price'))->money('JOD'),

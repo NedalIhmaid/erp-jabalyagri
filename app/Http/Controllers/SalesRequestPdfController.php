@@ -18,7 +18,7 @@ class SalesRequestPdfController extends Controller
 
         abort_unless($canAccess, 403);
 
-        $request->load(['user', 'items.product', 'items.productUnit', 'approvalStages.approver']);
+        $request->load(['user', 'items.companyMaterial', 'items.product', 'items.productUnit', 'approvalStages.approver']);
 
         $html = view('pdf.sales-request', compact('request'))->render();
 

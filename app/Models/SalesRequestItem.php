@@ -20,6 +20,7 @@ class SalesRequestItem extends Model
     protected $fillable = [
         'sales_approval_request_id',
         'product_id',
+        'company_material_id',
         'product_unit_id',
         'product_name',
         'quantity',
@@ -39,6 +40,11 @@ class SalesRequestItem extends Model
         return $this->belongsTo(Product::class);
     }
 
+    public function companyMaterial(): BelongsTo
+    {
+        return $this->belongsTo(CompanyMaterial::class);
+    }
+
     public function productUnit(): BelongsTo
     {
         return $this->belongsTo(ProductUnit::class);
@@ -46,7 +52,8 @@ class SalesRequestItem extends Model
 
     public function getDisplayProductNameAttribute(): string
     {
-        return $this->product?->name
+        return $this->companyMaterial?->name
+            ?? $this->product?->name
             ?? (string) $this->product_name;
     }
 }
