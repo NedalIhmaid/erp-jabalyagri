@@ -6,7 +6,6 @@
 @endphp
 
 <a href="{{ ProductFamilyResource::getUrl('view', ['record' => $family]) }}" class="catalog-family-row">
-    <span class="catalog-family-row__index"><bdi>{{ str_pad($number ?? 1, 2, '0', STR_PAD_LEFT) }}</bdi></span>
 
     <div class="catalog-family-row__photo">
         @if ($imageUrl)
@@ -34,6 +33,4 @@
             <small>{{ __('products.varieties') }}</small>
         </span>
     </div>
-
-    <x-heroicon-m-arrow-left class="catalog-family-row__arrow catalog-direction-icon" />
 </a>
