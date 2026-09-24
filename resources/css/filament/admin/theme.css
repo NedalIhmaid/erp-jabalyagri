@@ -48,6 +48,7 @@ html[dir='rtl'] :is(input, textarea, select) {
 .fi-sidebar-nav {
     background: #ffffff;
     position: relative;
+    overflow: visible;
 }
 
 /* The collapse-sidebar toggle is moved out of the topbar and into the top
@@ -78,6 +79,11 @@ html[dir='rtl'] :is(input, textarea, select) {
 
 .fi-sidebar-nav-collapse-btn-ctn .fi-icon-btn:hover {
     color: white !important;
+}
+
+[lang='ar'] .fi-sidebar-nav-collapse-btn-ctn {
+    left: -19px;
+    right: auto;
 }
 
 .fi-topbar-quick-actions {
@@ -430,5 +436,164 @@ a.catalog-hero__eyebrow--link { @apply inline-block hover:underline underline-of
     .catalog-related__item {
         transition: none !important;
         transform: none !important;
+    }
+}
+
+/* --------------------------------------------------------------------------
+ * Catalog index — card-grid pass. Overrides the ruled-list rules above:
+ * family rows become bordered, rounded cards laid out three to a row.
+ * ------------------------------------------------------------------------ */
+
+.catalog-index__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.catalog-family-row {
+    align-items: center;
+    column-gap: calc(var(--spacing) * 4);
+    row-gap: calc(var(--spacing) * 2);
+    border-bottom-style: var(--tw-border-style);
+    border-width: 1px;
+    border-color: #167d2a;
+    border-radius: 5px;
+    width: calc(33.3% - 12px);
+    padding-bottom: calc(var(--spacing) * 4);
+    padding-top: 0;
+    transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to;
+    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+    transition-duration: var(--tw-duration, var(--default-transition-duration));
+    flex-wrap: wrap;
+    display: flex;
+    flex-direction: column;
+}
+
+.catalog-family-row__photo {
+    width: 100%;
+    height: 200px;
+    border-radius: 5px;
+    background-color: var(--color-white);
+    color: var(--gray-300);
+    flex-shrink: 0;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    overflow: hidden;
+    padding: 0;
+}
+
+.catalog-family-row__body {
+    flex: auto;
+    text-align: center;
+}
+
+.catalog-index__list {
+    border: 0;
+}
+
+.catalog-family-row__stats {
+    align-items: center;
+    column-gap: calc(var(--spacing) * 4);
+    row-gap: calc(var(--spacing) * 1);
+    flex-wrap: wrap;
+    flex-shrink: 0;
+    display: flex;
+    border: none;
+    padding: 0;
+}
+
+.catalog-index__hero {
+    border-bottom-style: var(--tw-border-style);
+    border-bottom-width: 1px;
+}
+
+.catalog-search {
+    margin-top: calc(var(--spacing) * 6);
+    margin-bottom: calc(var(--spacing) * 4);
+    width: 100%;
+    max-width: var(--container-sm);
+    align-items: center;
+    gap: calc(var(--spacing) * 2);
+    border-style: var(--tw-border-style);
+    border-width: 1px;
+    border-color: var(--color-line);
+    background-color: var(--color-white);
+    border-radius: 5px;
+    padding-inline: calc(var(--spacing) * 3);
+    padding-block: calc(var(--spacing) * 2);
+    font-size: var(--text-sm);
+    line-height: var(--tw-leading, var(--text-sm--line-height));
+    transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to;
+    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+    transition-duration: var(--tw-duration, var(--default-transition-duration));
+    display: flex;
+}
+
+
+
+
+.catalog-family-card {
+    flex-direction: column;
+    display: flex;
+    border-width: 1px;
+    border-color: #167d2a;
+    border-radius: 5px;
+}
+
+.catalog-family-card__photo {
+    padding: 0;
+    border-radius: 5px;
+    background-color: #167d2a;
+}
+
+.catalog-family-card__photo img {
+    object-fit: cover;
+}
+
+.catalog-family-grid {
+        flex-wrap: wrap;
+    gap: 16px;
+    display: flex;
+}
+
+.catalog-family-card {
+        width: calc(33.3% - 12px);
+}
+
+.catalog-product__hero {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    border: 0;
+}
+
+.catalog-product__photo {
+    border: 0;
+    margin-top: 30px;
+}
+
+.catalog-product__photo img {
+    object-fit: cover;
+    padding: 0;
+    max-height: 400px;
+    max-width: 800px;
+    border-radius: 5px;
+}
+
+.catalog-button {
+    border-radius: 5px;
+}
+
+.fi-body {
+    background-color: white;
+}
+.fi-sidebar-nav {
+    box-shadow: 0 0 15px #00000024;
+}
+@supports (color:color-mix(in lab, red, red)) {
+    .fi-sidebar-nav:where(.dark,.dark *), .fi-body:where(.dark,.dark *) {
+        background-color: 
+color-mix(in oklab, var(--gray-900) 90%, transparent);
     }
 }
