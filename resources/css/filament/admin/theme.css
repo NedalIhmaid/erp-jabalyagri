@@ -45,6 +45,41 @@ html[dir='rtl'] :is(input, textarea, select) {
     @apply backdrop-blur-md bg-white/90 dark:bg-gray-900/90;
 }
 
+.fi-sidebar-nav {
+    background: #ffffff;
+    position: relative;
+}
+
+/* The collapse-sidebar toggle is moved out of the topbar and into the top
+ * right corner of the sidebar nav itself (see AdminPanelProvider's
+ * SIDEBAR_NAV_START render hook + resources/views/filament/sidebar/collapse-button.blade.php). */
+.fi-topbar-collapse-sidebar-btn-ctn {
+    display: none;
+}
+
+.fi-sidebar-nav-collapse-btn-ctn {
+    align-items: center;
+    gap: calc(var(--spacing) * 1);
+    z-index: 10;
+    display: flex;
+    position: absolute;
+    top: .75rem;
+    right: -19px;
+    padding: 5px;
+    background: antiquewhite;
+    border-radius: 20px;
+    color: white;
+    background-image: linear-gradient(130deg, #239637, #186624);
+}
+
+.fi-sidebar-nav-collapse-btn-ctn .fi-icon-btn {
+    color: white;
+}
+
+.fi-sidebar-nav-collapse-btn-ctn .fi-icon-btn:hover {
+    color: white !important;
+}
+
 .fi-topbar-quick-actions {
     @apply flex flex-none items-center gap-2 sm:gap-3;
 }
