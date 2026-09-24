@@ -10,6 +10,7 @@ use App\Filament\Pages\EngineerDashboard;
 use App\Filament\Pages\GeneralManagerDashboard;
 use App\Filament\Pages\HrReports;
 use App\Filament\Pages\SalesReports;
+use App\Filament\Pages\WhatsAppDiagnostics;
 use App\Filament\Resources\HrRequestResource;
 use App\Http\Middleware\SetUserLocale;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
@@ -99,6 +100,7 @@ class AdminPanelProvider extends PanelProvider
                 AuditLogPage::class,
                 SalesReports::class,
                 HrReports::class,
+                WhatsAppDiagnostics::class,
             ])
             ->widgets([
                 AccountWidget::class,
