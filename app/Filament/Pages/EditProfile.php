@@ -17,6 +17,14 @@ class EditProfile extends BaseEditProfile
         return __('general.settings');
     }
 
+    /**
+     * @return array<string>
+     */
+    public function getPageClasses(): array
+    {
+        return ['fi-settings-form'];
+    }
+
     protected function getNameFormComponent(): Component
     {
         return parent::getNameFormComponent()
