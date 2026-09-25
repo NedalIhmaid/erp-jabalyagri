@@ -14,14 +14,33 @@
             <span>{{ $family->name }}</span>
         </nav>
 
-        <div class="catalog-family__body">
+        <div class="catalog-index__content mt-30">
             <section class="catalog-section catalog-section--full">
                 <h2>{{ __('products.varieties') }}</h2>
 
                 @if ($products->isNotEmpty())
                     <div class="catalog-family-grid">
                         @foreach ($products as $product)
-                            @php($productImage = $product->image_path ? Storage::disk('public')->url($product->image_path) : $imageUrl)
+                            @php
+                                $productImage = $product->image_path ? Storage::disk('public')->url($product->image_path) : $imageUrl;
+
+                                // Same lead-extraction rule as the product detail hero
+                                // (view-product.blade.php): first paragraph for rich-text
+                                // descriptions, first line for plain text.
+                                $description = trim((string) $product->description);
+                                $isHtmlDescription = $description !== '' && $description !== strip_tags($description);
+
+                                if ($isHtmlDescription) {
+                                    $lead = '';
+                                    if (preg_match('/<p[^>]*>(.*?)<\/p>/us', strip_tags($description, '<p>'), $match)) {
+                                        $lead = trim(strip_tags($match[1]));
+                                    }
+                                } else {
+                                    $lead = $description === '' ? '' : trim(preg_split('/\R/u', $description)[0] ?? '');
+                                }
+
+                                $lead = $lead !== '' ? \Illuminate\Support\Str::limit($lead, 200) : '';
+                            @endphp
                             <a
                                 href="{{ \App\Filament\Resources\ProductResource::getUrl('view', ['record' => $product]) }}"
                                 class="catalog-family-card @if (! $product->is_active) is-inactive @endif"
@@ -39,6 +58,7 @@
                                 <div class="catalog-family-card__body">
                                     <h3>{{ $product->name }}</h3>
                                 </div>
+                                <p class="catalog-product__lead">{{ $lead ?: __('products.no_description') }}</p>
                             </a>
                         @endforeach
                     </div>
