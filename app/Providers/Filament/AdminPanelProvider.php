@@ -89,6 +89,10 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::GLOBAL_SEARCH_AFTER,
                 fn (): string => view('filament.topbar.actions')->render(),
             )
+            ->renderHook(
+                PanelsRenderHook::SIDEBAR_NAV_START,
+                fn (): string => view('filament.sidebar.collapse-button')->render(),
+            )
             ->homeUrl(fn () => static::resolveHomeUrl())
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
