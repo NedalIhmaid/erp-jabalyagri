@@ -345,6 +345,14 @@ a.catalog-hero__eyebrow--link { @apply inline-block hover:underline underline-of
 .catalog-family-card__body h3 { @apply text-base font-bold text-gray-950 dark:text-white; }
 .catalog-family-card:hover h3 { @apply underline decoration-primary-600 underline-offset-4 dark:decoration-primary-400; }
 
+/* `.catalog-product__lead` is shared with the product hero, where it's a
+ * large, untruncated lead paragraph. Scoped down here so it fits a card:
+ * smaller, centered, clamped to two lines so card heights stay even, and
+ * padded since it sits outside `.catalog-family-card__body`. */
+.catalog-family-card .catalog-product__lead {
+    @apply mt-1 line-clamp-2 max-w-none px-3 pb-3 text-center text-sm leading-6 text-soil/80 dark:text-gray-400;
+}
+
 /* --------------------------------------------------------------------------
  * Catalog index — the engineer list page renders its own hero, search box and
  * rows (no Filament table), so the catalog hairline language needs no
@@ -504,8 +512,7 @@ a.catalog-hero__eyebrow--link { @apply inline-block hover:underline underline-of
 }
 
 .catalog-index__hero {
-    border-bottom-style: var(--tw-border-style);
-    border-bottom-width: 1px;
+    border:0 ;
 }
 
 .catalog-search {
@@ -545,6 +552,8 @@ a.catalog-hero__eyebrow--link { @apply inline-block hover:underline underline-of
     padding: 0;
     border-radius: 5px;
     background-color: #167d2a;
+    aspect-ratio: unset;
+    height: 200px;
 }
 
 .catalog-family-card__photo img {
@@ -570,15 +579,22 @@ a.catalog-hero__eyebrow--link { @apply inline-block hover:underline underline-of
 
 .catalog-product__photo {
     border: 0;
-    margin-top: 30px;
+    max-height: 400px;
+    max-width: 800px;
+    margin: 30px auto 0;
+    border-radius: 5px;
+    width: 100%;
+    height: 100%;
+
 }
 
 .catalog-product__photo img {
     object-fit: cover;
+    max-width: none;
+    max-height: none;
+    width: 100%;
+    height: 100%;
     padding: 0;
-    max-height: 400px;
-    max-width: 800px;
-    border-radius: 5px;
 }
 
 .catalog-button {
@@ -596,4 +612,106 @@ a.catalog-hero__eyebrow--link { @apply inline-block hover:underline underline-of
         background-color: 
 color-mix(in oklab, var(--gray-900) 90%, transparent);
     }
+}
+
+.catalog-family-row__photo img {
+    object-fit: cover;
+}
+
+.catalog-family-row:hover h3 {
+        text-decoration-line: none;
+}
+
+
+.mt-30 {
+    margin-top: 30px;
+}
+
+.catalog-family-card .catalog-product__lead {
+    margin-bottom: calc(var(--spacing) * 3);
+     padding-bottom: 0;
+}
+
+/* --------------------------------------------------------------------------
+ * Settings page (/settings, App\Filament\Pages\EditProfile) — each field is
+ * an outlined box with its label notched into the top border line, like a
+ * Material outlined input. Scoped to `.fi-settings-form`, set via
+ * EditProfile::form()'s ->extraAttributes(), so nothing else in the admin
+ * panel is affected.
+ *
+ * Filament stacks the label above the input in normal flow rather than
+ * overlapping it, so the notch is faked: the label is pulled up with
+ * absolute positioning to sit on the box's top border, with a white backing
+ * behind the label text to punch a gap in the line under it.
+ * ------------------------------------------------------------------------ */
+
+.fi-settings-form {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.fi-settings-form .fi-fo-field {
+    position: relative;
+}
+
+.fi-settings-form .fi-fo-field-label-col {
+        z-index: 1;
+    pointer-events: none;
+    top: -16px;
+    position: absolute;
+    inset-inline-start: .75rem;
+    padding: 5px 8px;
+    height: fit-content;
+        background: white;
+}
+
+.fi-settings-form .fi-fo-field-label-ctn {
+    @apply bg-white dark:bg-gray-900;
+    display: inline-block;
+    padding-inline: 0.375rem;
+}
+
+.fi-settings-form .fi-fo-field-label-content {
+    @apply text-primary-600 dark:text-primary-400;
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
+.fi-settings-form .fi-input-wrp {
+    @apply border border-gray-300 bg-white dark:border-white/10 dark:bg-gray-900;
+    border-radius: 0.5rem;
+    padding-top: 0.375rem;
+    transition: border-color 0.15s ease;
+}
+
+.fi-settings-form .fi-input-wrp:focus-within {
+    @apply border-primary-600 dark:border-primary-400;
+}
+
+.fi-settings-form :is(.fi-input, .fi-select-input) {
+    @apply text-gray-950 dark:text-white;
+}
+
+.fi-settings-form :is(.fi-input, .fi-select-input):disabled {
+    @apply text-gray-500 dark:text-gray-400;
+}
+
+@media (max-width: 992px) {
+    .catalog-family-row,
+    .catalog-family-card {
+        width: calc(50% - 8px);
+    }
+}
+@media (max-width: 450px) {
+    .catalog-family-card__photo,
+    .catalog-family-row__photo {
+    height: 150px;
+
+    }
+}
+
+
+.catalog-family-row__desc {
+        padding-inline: calc(var(--spacing) * 3);
 }
