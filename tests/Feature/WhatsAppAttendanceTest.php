@@ -164,13 +164,43 @@ class WhatsAppAttendanceTest extends TestCase
             'services.whatsapp.provider' => 'meta',
             'services.whatsapp.token' => 'meta-token',
             'services.whatsapp.phone_number_id' => '123',
-            'services.whatsapp.app_secret' => null,
+            'services.whatsapp.app_secret' => 'meta-secret',
         ]);
         Http::fake(['graph.facebook.com/*' => Http::response(['messages' => [['id' => 'wamid.out']]], 200)]);
 
         $employee = $this->employee();
+        $payload = $this->metaLocationPayload();
 
-        $this->postJson('/whatsapp/webhook', [
+        $this->postJson('/whatsapp/webhook', $payload, [
+            'X-Hub-Signature-256' => 'sha256='.hash_hmac('sha256', json_encode($payload), 'meta-secret'),
+        ])->assertOk();
+
+        $this->assertDatabaseHas('attendance_records', [
+            'user_id' => $employee->id,
+            'type' => AttendanceType::CheckIn->value,
+            'provider_message_id' => 'wamid.in',
+        ]);
+        Http::assertSent(fn (Request $request): bool => $request['type'] === 'text');
+    }
+
+    public function test_meta_webhook_ignores_unsigned_messages_when_no_app_secret_is_configured(): void
+    {
+        config([
+            'services.whatsapp.provider' => 'meta',
+            'services.whatsapp.app_secret' => null,
+        ]);
+
+        $this->employee();
+
+        $this->postJson('/whatsapp/webhook', $this->metaLocationPayload())->assertOk();
+
+        $this->assertDatabaseCount('attendance_records', 0);
+    }
+
+    /** @return array<string, mixed> */
+    protected function metaLocationPayload(): array
+    {
+        return [
             'entry' => [[
                 'changes' => [[
                     'value' => [
@@ -183,14 +213,7 @@ class WhatsAppAttendanceTest extends TestCase
                     ],
                 ]],
             ]],
-        ])->assertOk();
-
-        $this->assertDatabaseHas('attendance_records', [
-            'user_id' => $employee->id,
-            'type' => AttendanceType::CheckIn->value,
-            'provider_message_id' => 'wamid.in',
-        ]);
-        Http::assertSent(fn (Request $request): bool => $request['type'] === 'text');
+        ];
     }
 
     public function test_check_in_reminders_use_text_inside_the_session_and_templates_outside_it(): void

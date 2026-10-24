@@ -196,14 +196,9 @@ class WhatsAppWebhookController extends Controller
     protected function signatureIsValid(Request $request): bool
     {
         $secret = config('services.whatsapp.app_secret');
-
-        if (! $secret) {
-            return true;
-        }
-
         $signature = (string) $request->header('X-Hub-Signature-256');
 
-        if ($signature === '') {
+        if (! $secret || $signature === '') {
             return false;
         }
 
