@@ -18,9 +18,13 @@ Route::get('/welcome', function () {
 Route::get('/privacy', fn () => view('legal.privacy'))->name('legal.privacy');
 Route::get('/terms', fn () => view('legal.terms'))->name('legal.terms');
 
-// Meta calls these unauthenticated; CSRF is excluded in bootstrap/app.php.
+// Meta and Twilio call these unauthenticated; CSRF is excluded in bootstrap/app.php.
 Route::get('/whatsapp/webhook', [WhatsAppWebhookController::class, 'verify']);
 Route::post('/whatsapp/webhook', [WhatsAppWebhookController::class, 'handle']);
+Route::post('/whatsapp/twilio/status', [WhatsAppWebhookController::class, 'twilioStatus'])
+    ->name('whatsapp.twilio.status');
+Route::post('/whatsapp/twilio/inbound', [WhatsAppWebhookController::class, 'twilioInbound'])
+    ->name('whatsapp.twilio.inbound');
 
 Route::middleware(['web', 'auth'])->group(function () {
     Route::get('/sales-requests/{request}/pdf', [SalesRequestPdfController::class, 'download'])

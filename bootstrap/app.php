@@ -11,9 +11,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Meta signs webhook POSTs with the app secret instead of a CSRF token.
+        // Meta and Twilio sign webhook POSTs instead of sending a CSRF token.
         $middleware->validateCsrfTokens(except: [
             'whatsapp/webhook',
+            'whatsapp/twilio/status',
+            'whatsapp/twilio/inbound',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

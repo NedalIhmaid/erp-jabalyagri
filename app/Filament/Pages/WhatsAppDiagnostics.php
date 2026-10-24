@@ -3,6 +3,8 @@
 namespace App\Filament\Pages;
 
 use App\Services\WhatsApp\PhoneNumber;
+use App\Services\WhatsApp\WhatsAppClient;
+use App\Services\WhatsApp\WhatsAppMessage;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
@@ -10,9 +12,7 @@ use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\RateLimiter;
-use Throwable;
 
 class WhatsAppDiagnostics extends Page
 {
@@ -89,8 +89,29 @@ class WhatsAppDiagnostics extends Page
     /** @return array<string, string> */
     public function configurationStatus(): array
     {
+        $enabled = config('services.whatsapp.enabled') ? 'ready' : 'missing';
+
+        if (WhatsAppClient::provider() === 'twilio') {
+            $templateKeys = array_keys(config('services.whatsapp.templates', []));
+            $mappedCount = collect($templateKeys)
+                ->filter(fn (string $key): bool => filled(config('services.whatsapp.twilio.content_sids.'.$key)))
+                ->count();
+
+            return [
+                'enabled' => $enabled,
+                'account_sid' => filled(config('services.whatsapp.twilio.account_sid')) ? 'ready' : 'missing',
+                'auth_token' => filled(config('services.whatsapp.twilio.auth_token')) ? 'ready' : 'missing',
+                'from' => filled(config('services.whatsapp.twilio.from')) ? 'ready' : 'missing',
+                'content_sids' => match (true) {
+                    $mappedCount === 0 => 'missing',
+                    $mappedCount < count($templateKeys) => 'warning',
+                    default => 'ready',
+                },
+            ];
+        }
+
         return [
-            'enabled' => config('services.whatsapp.enabled') ? 'ready' : 'missing',
+            'enabled' => $enabled,
             'token' => filled(config('services.whatsapp.token')) ? 'ready' : 'missing',
             'phone_number_id' => filled(config('services.whatsapp.phone_number_id')) ? 'ready' : 'missing',
             'mode' => config('services.whatsapp.mode') === 'template' ? 'ready' : 'warning',
@@ -109,7 +130,7 @@ class WhatsAppDiagnostics extends Page
             return;
         }
 
-        if (! config('services.whatsapp.enabled') || blank(config('services.whatsapp.token')) || blank(config('services.whatsapp.phone_number_id'))) {
+        if (! WhatsAppClient::isConfigured()) {
             Notification::make()
                 ->title(__('whatsapp.diagnostics.configuration_incomplete'))
                 ->danger()
@@ -132,61 +153,19 @@ class WhatsAppDiagnostics extends Page
         RateLimiter::hit($rateLimitKey, 60);
 
         $templateKey = (string) $state['template'];
-        $templateName = (string) config('services.whatsapp.templates.'.$templateKey, $templateKey);
-        $parameters = $this->testParameters($templateKey);
-        $payload = [
-            'messaging_product' => 'whatsapp',
-            'recipient_type' => 'individual',
-            'to' => $phone,
-            'type' => 'template',
-            'template' => [
-                'name' => $templateName,
-                'language' => ['code' => config('services.whatsapp.language', 'ar')],
-                'components' => [[
-                    'type' => 'body',
-                    'parameters' => array_map(
-                        fn (string $value): array => ['type' => 'text', 'text' => $value],
-                        $parameters,
-                    ),
-                ]],
-            ],
+        $message = WhatsAppMessage::make($templateKey, $this->testParameters($templateKey), '');
+        $client = app(WhatsAppClient::class);
+        $result = $client->send($phone, $message, useTemplate: true);
+
+        $this->result = [
+            'success' => $result->success,
+            'status' => $result->status,
+            'message_id' => $result->messageId,
+            'error' => $result->error,
+            'details' => $result->details,
+            'to' => PhoneNumber::mask($phone),
+            'template' => $client->templateLabel($message),
         ];
-
-        $endpoint = sprintf(
-            '%s/%s/%s/messages',
-            config('services.whatsapp.base_url'),
-            config('services.whatsapp.api_version'),
-            config('services.whatsapp.phone_number_id'),
-        );
-
-        try {
-            $response = Http::withToken(config('services.whatsapp.token'))
-                ->timeout((int) config('services.whatsapp.timeout', 10))
-                ->acceptJson()
-                ->post($endpoint, $payload);
-
-            $this->result = [
-                'success' => $response->successful(),
-                'status' => $response->status(),
-                'message_id' => $response->json('messages.0.id'),
-                'error' => $response->successful()
-                    ? null
-                    : ($response->json('error.message') ?? $response->body()),
-                'details' => $response->json('error.error_data.details'),
-                'to' => PhoneNumber::mask($phone),
-                'template' => $templateName,
-            ];
-        } catch (Throwable $exception) {
-            $this->result = [
-                'success' => false,
-                'status' => null,
-                'message_id' => null,
-                'error' => $exception->getMessage(),
-                'details' => null,
-                'to' => PhoneNumber::mask($phone),
-                'template' => $templateName,
-            ];
-        }
 
         Notification::make()
             ->title($this->result['success']
@@ -229,6 +208,7 @@ class WhatsAppDiagnostics extends Page
             'hr_request_submitted' => [__('whatsapp.diagnostics.test_user'), __('whatsapp.diagnostics.test_request_type'), __('whatsapp.diagnostics.test_employee'), now()->format('Y-m-d')],
             'hr_request_approved' => [__('whatsapp.diagnostics.test_user'), __('whatsapp.diagnostics.test_request_type'), __('whatsapp.diagnostics.test_actor')],
             'hr_request_rejected' => [__('whatsapp.diagnostics.test_user'), __('whatsapp.diagnostics.test_request_type'), __('whatsapp.diagnostics.test_actor'), __('whatsapp.diagnostics.test_reason')],
+            'attendance_check_in_reminder', 'attendance_check_out_reminder' => [__('whatsapp.diagnostics.test_user')],
             default => [],
         };
     }

@@ -32,5 +32,11 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <env name="WHATSAPP_ENABLED" value="false"/>
+        <env name="WHATSAPP_PROVIDER" value="meta"/>
+        <env name="WHATSAPP_TOKEN" value=""/>
+        <env name="WHATSAPP_APP_SECRET" value=""/>
+        <env name="TWILIO_ACCOUNT_SID" value=""/>
+        <env name="TWILIO_AUTH_TOKEN" value=""/>
     </php>
 </phpunit>

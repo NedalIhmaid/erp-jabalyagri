@@ -167,7 +167,6 @@ class HrRequestResource extends Resource
                     ->label(__('hr.start_date'))
                     ->required()
                     ->default(now())
-                    ->minDate(now())
                     ->native(false)
                     ->live()
                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
@@ -187,7 +186,7 @@ class HrRequestResource extends Resource
                     ->label(__('hr.end_date'))
                     ->visible(fn (callable $get) => ! $get('_is_departure'))
                     ->required(fn (callable $get) => ! $get('_is_departure'))
-                    ->minDate(fn (callable $get) => $get('start_date') ?? now())
+                    ->minDate(fn (callable $get) => $get('start_date'))
                     ->native(false)
                     ->live()
                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
@@ -289,6 +288,7 @@ class HrRequestResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->poll('10s')
             ->columns([
                 TextColumn::make('user.name')
                     ->label(__('general.employee'))

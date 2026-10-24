@@ -190,6 +190,7 @@ class DailyVisitResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->poll('10s')
             ->columns([
                 TextColumn::make('visit_date')
                     ->label(__('general.date'))

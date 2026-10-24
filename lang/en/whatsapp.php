@@ -10,6 +10,8 @@ return [
         'hr_request_submitted' => 'HR request submitted',
         'hr_request_approved' => 'HR request approved',
         'hr_request_rejected' => 'HR request rejected',
+        'attendance_check_in_reminder' => 'Check-in reminder',
+        'attendance_check_out_reminder' => 'Check-out reminder',
     ],
     'diagnostics' => [
         'navigation' => 'WhatsApp Diagnostics',
@@ -26,12 +28,12 @@ return [
         'configuration_incomplete' => 'WhatsApp configuration is incomplete',
         'invalid_phone' => 'The phone number is invalid.',
         'rate_limited' => 'The temporary limit was reached. Try again in one minute.',
-        'sent_successfully' => 'Meta accepted the message',
+        'sent_successfully' => 'The WhatsApp provider accepted the message',
         'send_failed' => 'Message delivery failed',
         'http_status' => 'HTTP status',
         'recipient' => 'Recipient',
         'message_id' => 'Message ID',
-        'meta_error' => 'Meta response',
+        'meta_error' => 'Provider response',
         'ready' => 'Ready',
         'missing' => 'Missing',
         'warning' => 'Review required',
@@ -40,6 +42,10 @@ return [
         'status_phone_number_id' => 'Phone Number ID',
         'status_mode' => 'Template mode',
         'status_language' => 'Language',
+        'status_account_sid' => 'Twilio Account SID',
+        'status_auth_token' => 'Twilio Auth Token',
+        'status_from' => 'WhatsApp sender',
+        'status_content_sids' => 'Twilio templates (Content SID)',
         'test_user' => 'Test user',
         'test_client' => 'Test client',
         'test_stage' => 'Test stage',
@@ -58,5 +64,12 @@ return [
     'hr_request_submitted' => 'Hello :name, a :type request from :employee starting :date needs your approval.',
     'hr_request_approved' => 'Hello :name, your :type request has been approved by :by — you can review the details in the system.',
     'hr_request_rejected' => 'Hello :name, your :type request was rejected by :by. Reason: :reason — please open the system for details.',
+
+    'attendance' => [
+        'attendance_check_in_reminder' => 'Good morning :name ☀️ Wishing you a great day! Please share your location 📍 here to record your check-in.',
+        'attendance_check_out_reminder' => 'Thank you for today\'s effort, :name 🌙 Before you leave, please share your location 📍 here to record your check-out.',
+        'checked_in' => 'Your check-in was recorded at :time ✅ Have a great day, :name!',
+        'checked_out' => 'Your check-out was recorded at :time 👋 Thank you, :name — enjoy your evening!',
+    ],
 
 ];

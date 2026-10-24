@@ -135,6 +135,7 @@ class HrReports extends Page implements HasTable
     public function table(Table $table): Table
     {
         return $table
+            ->poll('10s')
             ->query(HrRequest::query()->with(['user', 'manager']))
             ->columns([
                 TextColumn::make('user.name')

@@ -3,22 +3,27 @@
 namespace App\Channels;
 
 use App\Services\WhatsApp\PhoneNumber;
+use App\Services\WhatsApp\WhatsAppClient;
 use App\Services\WhatsApp\WhatsAppMessage;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Throwable;
 
 /**
- * Delivers notifications through the Meta WhatsApp Cloud API.
+ * Delivers notifications over WhatsApp through the configured provider
+ * (Meta Cloud API or Twilio).
  *
- * Business-initiated messages must use templates approved in Meta Business
- * Manager; the template names are mapped in config/services.php. Delivery
- * failures are logged and swallowed so an unreachable WhatsApp API can never
- * roll back or interrupt an approval workflow.
+ * Recipients who messaged the business within the last 24 hours get the
+ * free-form text; everyone else gets the approved template, whose name or
+ * Twilio Content SID is mapped in config/services.php. Delivery failures are
+ * logged and swallowed so an unreachable WhatsApp API can never roll back or
+ * interrupt an approval workflow.
  */
 class WhatsAppChannel
 {
+    public function __construct(protected WhatsAppClient $client)
+    {
+    }
+
     /**
      * Channels to append to a notification's via() list for this notifiable.
      * Returns an empty array when WhatsApp is off, misconfigured, or the
@@ -41,9 +46,7 @@ class WhatsAppChannel
 
     public static function isConfigured(): bool
     {
-        return (bool) config('services.whatsapp.enabled')
-            && (bool) config('services.whatsapp.token')
-            && (bool) config('services.whatsapp.phone_number_id');
+        return WhatsAppClient::isConfigured();
     }
 
     public function send(object $notifiable, Notification $notification): void
@@ -64,87 +67,33 @@ class WhatsAppChannel
             return;
         }
 
-        try {
-            $response = Http::withToken(config('services.whatsapp.token'))
-                ->timeout((int) config('services.whatsapp.timeout', 10))
-                ->retry((int) config('services.whatsapp.retries', 2), 500, throw: false)
-                ->acceptJson()
-                ->post($this->endpoint(), $this->payload($to, $message));
+        // Inside the recipient's 24-hour session a free-form message is delivered;
+        // outside it only an approved template gets through.
+        $useTemplate = config('services.whatsapp.mode') !== 'text'
+            && ! (method_exists($notifiable, 'hasOpenWhatsAppSession') && $notifiable->hasOpenWhatsAppSession());
 
-            if ($response->failed()) {
-                Log::warning('[WhatsApp] Delivery failed', [
-                    'to' => PhoneNumber::mask($to),
-                    'notification' => $notification::class,
-                    'template' => $this->templateName($message),
-                    'status' => $response->status(),
-                    'error' => $response->json('error.message') ?? $response->body(),
-                ]);
-            }
-        } catch (Throwable $exception) {
+        $result = $this->client->send($to, $message, $useTemplate, (int) config('services.whatsapp.retries', 2));
+
+        if ($result->success) {
+            return;
+        }
+
+        if ($result->status === null) {
             Log::warning('[WhatsApp] Delivery threw', [
                 'to' => PhoneNumber::mask($to),
                 'notification' => $notification::class,
-                'exception' => $exception->getMessage(),
+                'exception' => $result->error,
             ]);
-        }
-    }
 
-    protected function endpoint(): string
-    {
-        return sprintf(
-            '%s/%s/%s/messages',
-            config('services.whatsapp.base_url'),
-            config('services.whatsapp.api_version'),
-            config('services.whatsapp.phone_number_id'),
-        );
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    protected function payload(string $to, WhatsAppMessage $message): array
-    {
-        if (config('services.whatsapp.mode') === 'text') {
-            return [
-                'messaging_product' => 'whatsapp',
-                'recipient_type' => 'individual',
-                'to' => $to,
-                'type' => 'text',
-                'text' => [
-                    'preview_url' => false,
-                    'body' => $message->text,
-                ],
-            ];
+            return;
         }
 
-        $parameters = array_map(
-            fn (string $value): array => ['type' => 'text', 'text' => $value],
-            $message->sanitizedParameters(),
-        );
-
-        $template = [
-            'name' => $this->templateName($message),
-            'language' => ['code' => config('services.whatsapp.language', 'ar')],
-        ];
-
-        if ($parameters !== []) {
-            $template['components'] = [[
-                'type' => 'body',
-                'parameters' => $parameters,
-            ]];
-        }
-
-        return [
-            'messaging_product' => 'whatsapp',
-            'recipient_type' => 'individual',
-            'to' => $to,
-            'type' => 'template',
-            'template' => $template,
-        ];
-    }
-
-    protected function templateName(WhatsAppMessage $message): string
-    {
-        return config('services.whatsapp.templates.'.$message->templateKey, $message->templateKey);
+        Log::warning('[WhatsApp] Delivery failed', [
+            'to' => PhoneNumber::mask($to),
+            'notification' => $notification::class,
+            'template' => $useTemplate ? $this->client->templateLabel($message) : null,
+            'status' => $result->status,
+            'error' => $result->error,
+        ]);
     }
 }

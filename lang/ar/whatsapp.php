@@ -10,6 +10,8 @@ return [
         'hr_request_submitted' => 'تقديم طلب موارد بشرية',
         'hr_request_approved' => 'اعتماد طلب موارد بشرية',
         'hr_request_rejected' => 'رفض طلب موارد بشرية',
+        'attendance_check_in_reminder' => 'تذكير تسجيل الحضور',
+        'attendance_check_out_reminder' => 'تذكير تسجيل الانصراف',
     ],
     'diagnostics' => [
         'navigation' => 'فحص واتساب',
@@ -26,12 +28,12 @@ return [
         'configuration_incomplete' => 'إعدادات واتساب غير مكتملة',
         'invalid_phone' => 'رقم الهاتف غير صالح.',
         'rate_limited' => 'تم بلوغ الحد المؤقت. حاول بعد دقيقة.',
-        'sent_successfully' => 'تم قبول الرسالة من Meta',
+        'sent_successfully' => 'تم قبول الرسالة من مزوّد واتساب',
         'send_failed' => 'فشل إرسال الرسالة',
         'http_status' => 'رمز HTTP',
         'recipient' => 'المستلم',
         'message_id' => 'معرّف الرسالة',
-        'meta_error' => 'رد Meta',
+        'meta_error' => 'رد المزوّد',
         'ready' => 'جاهز',
         'missing' => 'ناقص',
         'warning' => 'يحتاج مراجعة',
@@ -40,6 +42,10 @@ return [
         'status_phone_number_id' => 'Phone Number ID',
         'status_mode' => 'وضع القوالب',
         'status_language' => 'اللغة',
+        'status_account_sid' => 'Twilio Account SID',
+        'status_auth_token' => 'Twilio Auth Token',
+        'status_from' => 'رقم واتساب المرسل',
+        'status_content_sids' => 'قوالب Twilio (Content SID)',
         'test_user' => 'مستخدم تجريبي',
         'test_client' => 'عميل تجريبي',
         'test_stage' => 'مرحلة تجريبية',
@@ -58,5 +64,12 @@ return [
     'hr_request_submitted' => 'مرحباً :name، تم رفع طلب :type من الموظف :employee بتاريخ :date ويحتاج إلى موافقتك.',
     'hr_request_approved' => 'مرحباً :name، تمت الموافقة على طلب :type الخاص بك من قبل :by — يمكنك مراجعة التفاصيل في النظام.',
     'hr_request_rejected' => 'مرحباً :name، تم رفض طلب :type الخاص بك من قبل :by. السبب: :reason — يرجى مراجعة النظام للتفاصيل.',
+
+    'attendance' => [
+        'attendance_check_in_reminder' => 'صباح الخير :name ☀️ نتمنى لك يوماً جميلاً! لا تنسَ إرسال موقعك 📍 هنا لتسجيل بداية الدوام.',
+        'attendance_check_out_reminder' => 'يعطيك العافية :name 🌙 قبل ما تغادر، أرسل موقعك 📍 هنا لتسجيل نهاية الدوام.',
+        'checked_in' => 'تم تسجيل حضورك الساعة :time ✅ يومك سعيد يا :name!',
+        'checked_out' => 'تم تسجيل انصرافك الساعة :time 👋 يعطيك العافية يا :name، مساءك سعيد!',
+    ],
 
 ];

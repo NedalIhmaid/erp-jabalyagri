@@ -44,6 +44,7 @@ class User extends Authenticatable implements FilamentUser
             'is_active' => 'boolean',
             'hire_date' => 'date',
             'gender' => Gender::class,
+            'whatsapp_last_inbound_at' => 'datetime',
         ];
     }
 
@@ -63,6 +64,35 @@ class User extends Authenticatable implements FilamentUser
     public function routeNotificationForWhatsapp(): ?string
     {
         return $this->is_active ? PhoneNumber::normalize($this->phone) : null;
+    }
+
+    /**
+     * WhatsApp accepts free-form messages only within 24 hours of the user's
+     * last message to the business number; outside it, templates are required.
+     */
+    public function hasOpenWhatsAppSession(): bool
+    {
+        return $this->whatsapp_last_inbound_at !== null
+            && $this->whatsapp_last_inbound_at->gt(now()->subDay());
+    }
+
+    /**
+     * Matches the digits-only sender of an inbound WhatsApp message against the
+     * phone numbers stored in whatever local format they were entered.
+     */
+    public static function findByWhatsAppNumber(string $digits): ?self
+    {
+        $digits = preg_replace('/\D/', '', $digits);
+
+        if ($digits === '') {
+            return null;
+        }
+
+        return static::query()
+            ->where('is_active', true)
+            ->whereNotNull('phone')
+            ->get()
+            ->first(fn (self $user): bool => $user->routeNotificationForWhatsapp() === $digits);
     }
 
     public function manager(): BelongsTo
@@ -88,5 +118,10 @@ class User extends Authenticatable implements FilamentUser
     public function hrRequests(): HasMany
     {
         return $this->hasMany(HrRequest::class);
+    }
+
+    public function attendanceRecords(): HasMany
+    {
+        return $this->hasMany(AttendanceRecord::class);
     }
 }

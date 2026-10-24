@@ -349,6 +349,7 @@ class SalesApprovalRequestResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->poll('10s')
             ->columns([
                 TextColumn::make('request_number')
                     ->label(__('sales.request_number'))

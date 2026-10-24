@@ -136,6 +136,7 @@ class SalesReports extends Page implements HasTable
         ];
 
         return $table
+            ->poll('10s')
             ->query($this->getScopedSalesReportQuery()->with(['user', 'items'])->withCount('items'))
             ->columns([
                 TextColumn::make('request_number')

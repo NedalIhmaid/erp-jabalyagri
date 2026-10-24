@@ -205,4 +205,5 @@ return [
     'sales_chart_title'      => 'Sales Requests (last 30 days)',
     'request_count'          => 'Request Count',
     'sales_per_engineer'     => 'Sales per Engineer',
+    'upload_expired'         => 'This upload has expired. Remove the file and upload it again.',
 ];

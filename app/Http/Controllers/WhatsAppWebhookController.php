@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Attendance\AttendanceRecorder;
 use App\Services\WhatsApp\PhoneNumber;
+use App\Services\WhatsApp\WhatsAppClient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Receives WhatsApp Cloud API webhooks.
+ * Receives WhatsApp Cloud API webhooks, Twilio status callbacks and Twilio
+ * inbound messages. Inbound locations from employees become attendance records.
  *
  * Meta verifies the endpoint once with a GET carrying hub.* query parameters,
  * then POSTs delivery status updates and inbound messages. Every POST is
@@ -35,7 +38,7 @@ class WhatsAppWebhookController extends Controller
         return response('Forbidden', 403);
     }
 
-    public function handle(Request $request): Response
+    public function handle(Request $request, AttendanceRecorder $attendance): Response
     {
         if (! $this->signatureIsValid($request)) {
             Log::channel('whatsapp')->warning('[WhatsApp] Webhook signature mismatch', ['ip' => $request->ip()]);
@@ -53,11 +56,99 @@ class WhatsAppWebhookController extends Controller
 
                 foreach ($value['messages'] ?? [] as $message) {
                     $this->logInbound($message);
+
+                    $location = ($message['type'] ?? null) === 'location' ? ($message['location'] ?? null) : null;
+
+                    $attendance->handleInbound(
+                        (string) ($message['from'] ?? ''),
+                        $message['id'] ?? null,
+                        is_array($location) ? [
+                            'latitude' => $location['latitude'] ?? null,
+                            'longitude' => $location['longitude'] ?? null,
+                            'address' => $location['address'] ?? null,
+                            'label' => $location['name'] ?? null,
+                        ] : null,
+                    );
                 }
             }
         }
 
         return response('', 200);
+    }
+
+    /**
+     * Twilio POSTs a form-encoded status update to the StatusCallback URL sent
+     * with each message. Failures carry a Twilio ErrorCode (63xxx for WhatsApp).
+     */
+    public function twilioStatus(Request $request): Response
+    {
+        if (! $this->twilioSignatureIsValid($request, WhatsAppClient::twilioStatusCallbackUrl())) {
+            Log::channel('whatsapp')->warning('[WhatsApp] Twilio signature mismatch', ['ip' => $request->ip()]);
+
+            return response('', 200);
+        }
+
+        $status = (string) $request->input('MessageStatus');
+        $errorCode = $request->input('ErrorCode');
+
+        $context = [
+            'id' => $request->input('MessageSid'),
+            'status' => $status,
+            'to' => PhoneNumber::mask(preg_replace('/\D/', '', (string) $request->input('To'))),
+        ];
+
+        if (! $errorCode && ! in_array($status, ['failed', 'undelivered'], true)) {
+            Log::channel('whatsapp')->info('[WhatsApp] Status', $context);
+
+            return response('', 200);
+        }
+
+        Log::channel('whatsapp')->warning('[WhatsApp] Status failed', $context + [
+            'code' => $errorCode,
+            'details' => $request->input('ErrorMessage'),
+        ]);
+
+        return response('', 200);
+    }
+
+    /**
+     * Twilio POSTs every message sent to the WhatsApp sender to the "A message
+     * comes in" URL configured on the sender. A shared location arrives as
+     * Latitude/Longitude fields. The reply is sent through the API, so the
+     * TwiML response is always empty.
+     */
+    public function twilioInbound(Request $request, AttendanceRecorder $attendance): Response
+    {
+        $emptyTwiml = response('<?xml version="1.0" encoding="UTF-8"?><Response></Response>', 200)
+            ->header('Content-Type', 'text/xml');
+
+        if (! $this->twilioSignatureIsValid($request, WhatsAppClient::twilioInboundUrl())) {
+            Log::channel('whatsapp')->warning('[WhatsApp] Twilio signature mismatch', ['ip' => $request->ip()]);
+
+            return $emptyTwiml;
+        }
+
+        $from = preg_replace('/\D/', '', (string) $request->input('From'));
+        $hasLocation = $request->filled('Latitude') && $request->filled('Longitude');
+
+        Log::channel('whatsapp')->info('[WhatsApp] Inbound', [
+            'from' => PhoneNumber::mask($from),
+            'type' => $hasLocation ? 'location' : 'text',
+            'body' => $request->input('Body'),
+        ]);
+
+        $attendance->handleInbound(
+            $from,
+            $request->input('MessageSid'),
+            $hasLocation ? [
+                'latitude' => $request->input('Latitude'),
+                'longitude' => $request->input('Longitude'),
+                'address' => $request->input('Address'),
+                'label' => $request->input('Label'),
+            ] : null,
+        );
+
+        return $emptyTwiml;
     }
 
     /**
@@ -117,5 +208,31 @@ class WhatsAppWebhookController extends Controller
         }
 
         return hash_equals('sha256='.hash_hmac('sha256', $request->getContent(), $secret), $signature);
+    }
+
+    /**
+     * Twilio signs the public URL it posted to followed by every POST field,
+     * sorted by name and concatenated as name+value, using HMAC-SHA1 with the
+     * auth token.
+     */
+    protected function twilioSignatureIsValid(Request $request, string $url): bool
+    {
+        $token = config('services.whatsapp.twilio.auth_token');
+        $signature = (string) $request->header('X-Twilio-Signature');
+
+        if (! $token || $signature === '') {
+            return false;
+        }
+
+        $fields = $request->request->all();
+        ksort($fields);
+
+        $payload = $url;
+
+        foreach ($fields as $name => $value) {
+            $payload .= $name.$value;
+        }
+
+        return hash_equals(base64_encode(hash_hmac('sha1', $payload, $token, true)), $signature);
     }
 }

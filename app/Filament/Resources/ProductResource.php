@@ -237,8 +237,7 @@ class ProductResource extends Resource
                                     ->columnSpan(2),
                             ])
                             ->columns(4)
-                            ->minItems(1)
-                            ->defaultItems(1)
+                            ->defaultItems(0)
                             ->addActionLabel(__('products.add_unit'))
                             ->reorderable(),
                     ])->columnSpanFull(),
