@@ -463,7 +463,11 @@ class SalesApprovalRequestResource extends Resource
                     Textarea::make('comments')->label(__('general.comments')),
                 ])
                 ->action(function (SalesApprovalRequest $record, array $data): void {
-                    app(SalesApprovalService::class)->approve($record, auth()->user(), $data['comments'] ?? null);
+                    if (! app(SalesApprovalService::class)->approve($record, auth()->user(), $data['comments'] ?? null)) {
+                        static::notifyActionNotApplied();
+
+                        return;
+                    }
 
                     Notification::make()
                         ->title(__('general.approved'))
@@ -488,7 +492,11 @@ class SalesApprovalRequestResource extends Resource
                     Textarea::make('rejection_reason')->label(__('general.reason'))->required(),
                 ])
                 ->action(function (SalesApprovalRequest $record, array $data): void {
-                    app(SalesApprovalService::class)->reject($record, auth()->user(), $data['rejection_reason']);
+                    if (! app(SalesApprovalService::class)->reject($record, auth()->user(), $data['rejection_reason'])) {
+                        static::notifyActionNotApplied();
+
+                        return;
+                    }
 
                     Notification::make()
                         ->title(__('general.rejected'))
@@ -513,7 +521,11 @@ class SalesApprovalRequestResource extends Resource
                     Textarea::make('return_reason')->label(__('general.reason'))->required(),
                 ])
                 ->action(function (SalesApprovalRequest $record, array $data): void {
-                    app(SalesApprovalService::class)->returnToEngineer($record, auth()->user(), $data['return_reason']);
+                    if (! app(SalesApprovalService::class)->returnToEngineer($record, auth()->user(), $data['return_reason'])) {
+                        static::notifyActionNotApplied();
+
+                        return;
+                    }
 
                     Notification::make()
                         ->title(__('general.returned'))
@@ -521,6 +533,16 @@ class SalesApprovalRequestResource extends Resource
                         ->send();
                 }),
         ];
+    }
+
+    protected static function notifyActionNotApplied(): void
+    {
+        Notification::make()
+            ->title(__('general.action_not_applied'))
+            ->body(__('general.action_not_applied_body'))
+            ->danger()
+            ->persistent()
+            ->send();
     }
 
     protected static function getActions(): array

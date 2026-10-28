@@ -26,6 +26,8 @@ return [
     'cancelled' => 'Cancelled',
     'returned' => 'Returned',
     'in_progress' => 'In Progress',
+    'action_not_applied' => 'Action not applied',
+    'action_not_applied_body' => 'Nothing was saved because the request changed or you cannot act on this stage. Refresh the page and try again.',
     'yes' => 'Yes',
     'no' => 'No',
     'confirm' => 'Confirm',
